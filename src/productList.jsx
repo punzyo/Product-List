@@ -135,6 +135,12 @@ function ProductList() {
     });
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleApplyPriceRange();
+    }
+  };
+  
   return (
     <div className="main-wrapper">
       <aside className="aside-wrapper">
@@ -179,6 +185,7 @@ function ProductList() {
                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
               }}
               onChange={(e) => handlePriceInputChange('min', e.target.value)}
+              onKeyDown={handleKeyDown}
             />
             <span> - </span>
             <input
@@ -189,6 +196,7 @@ function ProductList() {
                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
               }}
               onChange={(e) => handlePriceInputChange('max', e.target.value)}
+              onKeyDown={handleKeyDown}
             />
             <button className="price-button" onClick={handleApplyPriceRange}>
               Go
