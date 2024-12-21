@@ -61,7 +61,7 @@ function ProductList() {
   const [filteredProducts, setFilteredProducts] = useState(products);
 
   useEffect(() => {
-    let filtered = products.filter((product) => {
+    const filtered = products.filter((product) => {
       const matchesCategory =
         filters.selectedCategories.length === 0 ||
         filters.selectedCategories.includes(product.category);
@@ -85,56 +85,25 @@ function ProductList() {
     setFilteredProducts(filtered);
   }, [filters]);
   return (
-    <div>
-      <aside>
-        <div>篩選</div>
-        <div>
-          <input
-            type="checkbox"
-            checked={filters.inStockOnly}
-            onChange={() => dispatch({ type: 'SET_IN_STOCK' })}
-          />
-          僅顯示有庫存商品
+    <div className="main-wrapper">
+      <aside className="aside-wrapper">
+        <div className="section-wrapper">
+          <span className="section-title">庫存</span>
+          <label className="label-wrapper">
+            <input
+              type="checkbox"
+              checked={filters.inStockOnly}
+              onChange={() => dispatch({ type: 'SET_IN_STOCK' })}
+            />
+            <span>僅顯示有庫存</span>
+          </label>
         </div>
-        <div>
-          金額
-          <input
-            type="number"
-            placeholder="最低價格"
-            min="0"
-            value={filters.priceRange.min}
-            onChange={(e) =>
-              dispatch({
-                type: 'SET_PRICE_RANGE',
-                payload: {
-                  type: 'min',
-                  value: e.target.value === '' ? '' : Number(e.target.value),
-                },
-              })
-            }
-          />
-          <input
-            type="number"
-            placeholder="最高價格"
-            min="0"
-            value={filters.priceRange.max}
-            onChange={(e) =>
-              dispatch({
-                type: 'SET_PRICE_RANGE',
-                payload: {
-                  type: 'max',
-                  value: e.target.value === '' ? '' : Number(e.target.value),
-                },
-              })
-            }
-          />
-        </div>
-        <div>
-          類別
-          <ul>
+        <div className="section-wrapper">
+          <span className="section-title">類別</span>
+          <ul className="category-list">
             {categories.map((category) => (
               <li key={category}>
-                <label>
+                <label className="label-wrapper">
                   <input
                     type="checkbox"
                     value={category}
@@ -143,49 +112,104 @@ function ProductList() {
                       dispatch({ type: 'SET_CATEGORY', payload: category })
                     }
                   />
-                  {category}
+                  <span>{category}</span>
                 </label>
               </li>
             ))}
           </ul>
         </div>
+        <div className="section-wrapper">
+          <span className="section-title">金額</span>
+          <div className="price-input-wrapper">
+            <span>NT$ </span>
+            <input
+              className="price-input"
+              type="number"
+              min="0"
+              value={filters.priceRange.min}
+              onChange={(e) =>
+                dispatch({
+                  type: 'SET_PRICE_RANGE',
+                  payload: {
+                    type: 'min',
+                    value: e.target.value === '' ? '' : Number(e.target.value),
+                  },
+                })
+              }
+            />
+            <span> - </span>
+            <input
+              className="price-input"
+              type="number"
+              min="0"
+              value={filters.priceRange.max}
+              onChange={(e) =>
+                dispatch({
+                  type: 'SET_PRICE_RANGE',
+                  payload: {
+                    type: 'max',
+                    value: e.target.value === '' ? '' : Number(e.target.value),
+                  },
+                })
+              }
+            />
+          </div>
+        </div>
       </aside>
-      <div>
-        <input
-          type="text"
-          placeholder="搜尋商品"
-          value={filters.search}
-          onChange={(e) =>
-            dispatch({ type: 'SET_SEARCH', payload: e.target.value })
-          }
-        />
-        排序
-        <select
-          value={filters.sort}
-          onChange={(e) =>
-            dispatch({ type: 'SET_SORT', payload: e.target.value })
-          }
-        >
-          <option value="none">無價格排序</option>
-          <option value="priceAsc">價格由低至高</option>
-          <option value="priceDesc">價格由高至低</option>
-        </select>
-      </div>
-      <div>
-        <h3>篩選結果</h3>
-        <ul>
-          {filteredProducts.length > 0
-            ? filteredProducts.map((product, index) => {
-                if (index > 20) return;
-                return (
-                  <li key={product.id}>
-                    {product.name} - {product.category} - ${product.price} -
-                    {product.inStock ? '有庫存' : '無庫存'}
-                  </li>
-                );
-              })
-            : '無搜尋到商品'}
-        </ul>
+      <div className="products-wrapper">
+        <div className="products-top-wrapper">
+          <input
+            className="products-search"
+            type="text"
+            placeholder="搜尋商品"
+            value={filters.search}
+            onChange={(e) =>
+              dispatch({ type: 'SET_SEARCH', payload: e.target.value })
+            }
+          />
+          <span className="products-sort-title">排序</span>
+          <div className="products-sort-wrapper">
+            <select
+              value={filters.sort}
+              onChange={(e) =>
+                dispatch({ type: 'SET_SORT', payload: e.target.value })
+              }
+            >
+              <option value="none">產品編號</option>
+              <option value="priceAsc">價格由低至高</option>
+              <option value="priceDesc">價格由高至低</option>
+            </select>
+          </div>
+        </div>
+        <div className="products-bottom-wrapper">
+          <div className="products-title">{filteredProducts.length} 件商品</div>
+          <table className="products-table">
+            <thead>
+              <tr>
+                <th>商品名稱</th>
+                <th>類別</th>
+                <th>價格</th>
+                <th>庫存</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProducts.length > 0 ? (
+                filteredProducts.slice(0, 20).map((product, index) => (
+                  <tr key={index}>
+                    <td data-label="商品名稱: ">{product.name}</td>
+                    <td data-label="類別: ">{product.category}</td>
+                    <td data-label="價格: ">${product.price}</td>
+                    <td data-label="庫存: ">{product.inStock ? '是' : '否'}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4">無搜尋到商品</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
