@@ -3,6 +3,7 @@ import './productList.css';
 import products from '../items.json';
 import { generateButtons } from './generateButtons';
 import { generatePageOptions } from './generatePageOptions';
+import { useDebounce } from './useDebounce';
 
 const categories = ['A', 'B', 'C', 'D', 'E'];
 const initialState = {
@@ -68,12 +69,14 @@ const filterReducer = (state, action) => {
 function ProductList() {
   const [filters, dispatch] = useReducer(filterReducer, initialState);
   const [filteredProducts, setFilteredProducts] = useState(products);
+  const [searchInput, setSearchInput] = useState('');
   const [inputPriceRange, setInputPriceRange] = useState({
     min: '',
     max: '',
   });
   const productsPerPage = 14;
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
 
   useEffect(() => {
     const filtered = products.filter((product) => {
@@ -109,7 +112,6 @@ function ProductList() {
 
   const handleSetCategory = (category) =>
     dispatchAction('SET_CATEGORY', category);
-  const handleSetSearch = (search) => dispatchAction('SET_SEARCH', search);
   const handleSetSort = (sort) => dispatchAction('SET_SORT', sort);
   const handleSetPage = (page) => dispatchAction('SET_PAGE', page);
   const handleSetInStock = () => dispatchAction('SET_IN_STOCK');
@@ -117,6 +119,14 @@ function ProductList() {
     dispatchAction('SET_PAGE', filters.currentPage + 1);
   const handlePreviousPage = () =>
     dispatchAction('SET_PAGE', filters.currentPage - 1);
+
+  const debouncedSetSearch = useDebounce((search) => {
+    dispatchAction('SET_SEARCH', search);
+  }, 300);
+  const handleSetSearch = (e) => {
+    setSearchInput(e.target.value);
+    debouncedSetSearch(e.target.value);
+  };
 
   const handlePriceInputChange = (type, value) => {
     setInputPriceRange((prev) => ({
@@ -135,12 +145,12 @@ function ProductList() {
     });
   };
 
-  const handleKeyDown = (e) => {
+  const handlePriceKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleApplyPriceRange();
     }
   };
-  
+
   return (
     <div className="main-wrapper">
       <aside className="aside-wrapper">
@@ -185,7 +195,7 @@ function ProductList() {
                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
               }}
               onChange={(e) => handlePriceInputChange('min', e.target.value)}
-              onKeyDown={handleKeyDown}
+              onKeyDown={handlePriceKeyDown}
             />
             <span> - </span>
             <input
@@ -196,7 +206,7 @@ function ProductList() {
                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
               }}
               onChange={(e) => handlePriceInputChange('max', e.target.value)}
-              onKeyDown={handleKeyDown}
+              onKeyDown={handlePriceKeyDown}
             />
             <button className="price-button" onClick={handleApplyPriceRange}>
               Go
@@ -210,8 +220,8 @@ function ProductList() {
             className="products-search"
             type="text"
             placeholder="搜尋商品"
-            value={filters.search}
-            onChange={(e) => handleSetSearch(e.target.value)}
+            value={searchInput}
+            onChange={handleSetSearch}
           />
           <div className="products-sort-wrapper">
             <span className="products-sort-title">排序</span>
