@@ -1,13 +1,15 @@
 import { useState, useEffect, useReducer } from 'react';
 import './productList.css';
 import products from '../items.json';
+import { generateButtons } from './generateButtons';
+import { generatePageOptions } from './generatePageOptions';
 
 const categories = ['A', 'B', 'C', 'D', 'E'];
 const initialState = {
   selectedCategories: [],
   priceRange: { min: 0, max: Infinity },
   search: '',
-  inStockOnly: false,
+  inStock: false,
   sort: 'none',
   currentPage: 1,
 };
@@ -27,8 +29,8 @@ const filterReducer = (state, action) => {
       return {
         ...state,
         priceRange: {
-          ...state.priceRange,
-          [action.payload.type]: action.payload.value,
+          min: action.payload.min,
+          max: action.payload.max,
         },
         currentPage: 1,
       };
@@ -42,7 +44,7 @@ const filterReducer = (state, action) => {
     case 'SET_IN_STOCK':
       return {
         ...state,
-        inStockOnly: !state.inStockOnly,
+        inStock: !state.inStock,
         currentPage: 1,
       };
     case 'SET_SORT':
@@ -83,7 +85,7 @@ function ProductList() {
         product.price >= filters.priceRange.min &&
         product.price <= filters.priceRange.max;
 
-      const matchesStock = filters.inStockOnly ? product.inStock : true;
+      const matchesStock = filters.inStock ? product.inStock : true;
 
       const matchesSearch = product.name
         .toLowerCase()
@@ -101,37 +103,36 @@ function ProductList() {
     setFilteredProducts(filtered);
   }, [filters]);
 
-  const generateButtons = (currentPage, totalPages) => {
-    const buttons = [];
-
-    if (currentPage > 1) buttons.push('<');
-
-    const startPage = Math.max(2, currentPage - 2);
-    const endPage = Math.min(totalPages - 1, currentPage + 2);
-
-    buttons.push(1);
-    if (startPage > 2) buttons.push('...');
-    for (let i = startPage; i <= endPage; i++) {
-      buttons.push(i);
-    }
-
-    if (endPage < totalPages - 1) buttons.push('...');
-    if (totalPages > 1) buttons.push(totalPages);
-    if (currentPage < totalPages) buttons.push('>');
-
-    return buttons;
+  const dispatchAction = (type, payload) => {
+    dispatch({ type, payload });
   };
 
-  const generatePageOptions = (totalPages) => {
-    const options = [];
-    for (let i = 1; i <= totalPages; i++) {
-      options.push(
-        <option key={i} value={i}>
-          第 {i} 頁
-        </option>
-      );
-    }
-    return options;
+  const handleSetCategory = (category) =>
+    dispatchAction('SET_CATEGORY', category);
+  const handleSetSearch = (search) => dispatchAction('SET_SEARCH', search);
+  const handleSetSort = (sort) => dispatchAction('SET_SORT', sort);
+  const handleSetPage = (page) => dispatchAction('SET_PAGE', page);
+  const handleSetInStock = () => dispatchAction('SET_IN_STOCK');
+  const handleNextPage = () =>
+    dispatchAction('SET_PAGE', filters.currentPage + 1);
+  const handlePreviousPage = () =>
+    dispatchAction('SET_PAGE', filters.currentPage - 1);
+
+  const handlePriceInputChange = (type, value) => {
+    setInputPriceRange((prev) => ({
+      ...prev,
+      [type]: value === '' ? '' : Number(value),
+    }));
+  };
+
+  const handleApplyPriceRange = () => {
+    dispatch({
+      type: 'SET_PRICE_RANGE',
+      payload: {
+        min: inputPriceRange.min === '' ? 0 : inputPriceRange.min,
+        max: inputPriceRange.max === '' ? Infinity : inputPriceRange.max,
+      },
+    });
   };
 
   return (
@@ -142,8 +143,8 @@ function ProductList() {
           <label className="label-wrapper">
             <input
               type="checkbox"
-              checked={filters.inStockOnly}
-              onChange={() => dispatch({ type: 'SET_IN_STOCK' })}
+              checked={filters.inStock}
+              onChange={handleSetInStock}
             />
             <span>僅顯示有庫存</span>
           </label>
@@ -158,9 +159,7 @@ function ProductList() {
                     type="checkbox"
                     value={category}
                     checked={filters.selectedCategories.includes(category)}
-                    onChange={() =>
-                      dispatch({ type: 'SET_CATEGORY', payload: category })
-                    }
+                    onChange={() => handleSetCategory(category)}
                   />
                   <span>{category}</span>
                 </label>
@@ -179,12 +178,7 @@ function ProductList() {
               onInput={(e) => {
                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
               }}
-              onChange={(e) => {
-                setInputPriceRange((prev) => ({
-                  ...prev,
-                  min: e.target.value === '' ? '' : Number(e.target.value),
-                }));
-              }}
+              onChange={(e) => handlePriceInputChange('min', e.target.value)}
             />
             <span> - </span>
             <input
@@ -194,34 +188,9 @@ function ProductList() {
               onInput={(e) => {
                 e.target.value = e.target.value.replace(/[^0-9]/g, '');
               }}
-              onChange={(e) => {
-                setInputPriceRange((prev) => ({
-                  ...prev,
-                  max: e.target.value === '' ? '' : Number(e.target.value),
-                }));
-              }}
+              onChange={(e) => handlePriceInputChange('max', e.target.value)}
             />
-            <button className='price-button'
-              onClick={() => {
-                dispatch({
-                  type: 'SET_PRICE_RANGE',
-                  payload: {
-                    type: 'min',
-                    value: inputPriceRange.min === '' ? 0 : inputPriceRange.min,
-                  },
-                });
-                dispatch({
-                  type: 'SET_PRICE_RANGE',
-                  payload: {
-                    type: 'max',
-                    value:
-                      inputPriceRange.max === ''
-                        ? Infinity
-                        : inputPriceRange.max,
-                  },
-                });
-              }}
-            >
+            <button className="price-button" onClick={handleApplyPriceRange}>
               Go
             </button>
           </div>
@@ -234,17 +203,13 @@ function ProductList() {
             type="text"
             placeholder="搜尋商品"
             value={filters.search}
-            onChange={(e) =>
-              dispatch({ type: 'SET_SEARCH', payload: e.target.value })
-            }
+            onChange={(e) => handleSetSearch(e.target.value)}
           />
           <div className="products-sort-wrapper">
             <span className="products-sort-title">排序</span>
             <select
               value={filters.sort}
-              onChange={(e) =>
-                dispatch({ type: 'SET_SORT', payload: e.target.value })
-              }
+              onChange={(e) => handleSetSort(e.target.value)}
             >
               <option value="none">產品編號</option>
               <option value="priceAsc">價格由低至高</option>
@@ -298,12 +263,7 @@ function ProductList() {
                   return (
                     <button
                       key={index}
-                      onClick={() =>
-                        dispatch({
-                          type: 'SET_PAGE',
-                          payload: filters.currentPage - 1,
-                        })
-                      }
+                      onClick={handlePreviousPage}
                       disabled={filters.currentPage === 1}
                     >
                       &lt;
@@ -313,12 +273,7 @@ function ProductList() {
                   return (
                     <button
                       key={index}
-                      onClick={() =>
-                        dispatch({
-                          type: 'SET_PAGE',
-                          payload: filters.currentPage + 1,
-                        })
-                      }
+                      onClick={handleNextPage}
                       disabled={filters.currentPage === totalPages}
                     >
                       &gt;
@@ -330,9 +285,7 @@ function ProductList() {
                 return (
                   <button
                     key={index}
-                    onClick={() =>
-                      dispatch({ type: 'SET_PAGE', payload: button })
-                    }
+                    onClick={() => handleSetPage(button)}
                     className={
                       button === filters.currentPage ? 'active-button' : ''
                     }
@@ -347,9 +300,7 @@ function ProductList() {
             <span className="products-select-title">前往頁面</span>
             <select
               value={filters.currentPage}
-              onChange={(e) =>
-                dispatch({ type: 'SET_PAGE', payload: Number(e.target.value) })
-              }
+              onChange={(e) => handleSetPage(Number(e.target.value))}
             >
               {generatePageOptions(totalPages)}
             </select>
