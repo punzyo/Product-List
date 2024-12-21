@@ -70,7 +70,7 @@ const filterReducer = (state, action) => {
 function ProductList() {
   const [filters, dispatch] = useReducer(filterReducer, initialState);
   const [filteredProducts, setFilteredProducts] = useState(products);
-  const productsPerPage = 15;
+  const productsPerPage = 14;
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   useEffect(() => {
@@ -296,7 +296,7 @@ function ProductList() {
                   onClick={() =>
                     dispatch({ type: 'SET_PAGE', payload: button })
                   }
-                  disabled={button === filters.currentPage}
+                  className={button === filters.currentPage ? 'active-button' : ''}
                 >
                   {button}
                 </button>
