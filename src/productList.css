@@ -90,6 +90,7 @@ aside input[type='checkbox'] {
   white-space: nowrap;
 }
 .products-bottom-wrapper {
+  min-height: 685px;
   margin-top: 20px;
   text-align: center;
 }
@@ -236,6 +237,11 @@ aside input[type='checkbox'] {
   .section-wrapper {
     font-size: 14px;
   }
+  .products-pagination-wrapper button {
+    width: 22px;
+    height: 20px;
+    font-size: 9px;
+  }
   .products-table tbody {
     width: 100%;
     display: grid;
@@ -270,6 +276,7 @@ aside input[type='checkbox'] {
   .products-pagination-wrapper {
     height: 60px;
     flex-direction: column;
+    align-items: flex-start;
     flex-wrap: nowrap;
     font-size: 14px;
   }
