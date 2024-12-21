@@ -9,6 +9,7 @@ const initialState = {
   search: '',
   inStockOnly: false,
   sort: 'none',
+  currentPage: 1,
 };
 const filterReducer = (state, action) => {
   switch (action.type) {
@@ -19,6 +20,7 @@ const filterReducer = (state, action) => {
         selectedCategories: isSelected
           ? state.selectedCategories.filter((item) => item !== action.payload)
           : [...state.selectedCategories, action.payload],
+        currentPage: 1,
       };
     }
     case 'SET_PRICE_RANGE':
@@ -33,24 +35,33 @@ const filterReducer = (state, action) => {
                 : Infinity
               : action.payload.value,
         },
+        currentPage: 1,
       };
     case 'SET_SEARCH':
       return {
         ...state,
         search: action.payload,
+        currentPage: 1,
       };
     case 'SET_IN_STOCK':
       return {
         ...state,
         inStockOnly: !state.inStockOnly,
+        currentPage: 1,
       };
     case 'SET_SORT':
       return {
         ...state,
         sort: action.payload,
+        currentPage: 1,
       };
     case 'RESET_FILTERS':
       return initialState;
+    case 'SET_PAGE':
+      return {
+        ...state,
+        currentPage: action.payload,
+      };
     default:
       return state;
   }
@@ -59,6 +70,8 @@ const filterReducer = (state, action) => {
 function ProductList() {
   const [filters, dispatch] = useReducer(filterReducer, initialState);
   const [filteredProducts, setFilteredProducts] = useState(products);
+  const productsPerPage = 15;
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   useEffect(() => {
     const filtered = products.filter((product) => {
@@ -84,6 +97,28 @@ function ProductList() {
 
     setFilteredProducts(filtered);
   }, [filters]);
+
+  const generateButtons = (currentPage, totalPages) => {
+    const buttons = [];
+
+    if (currentPage > 1) buttons.push('<');
+
+    const startPage = Math.max(2, currentPage - 2);
+    const endPage = Math.min(totalPages - 1, currentPage + 2);
+  
+    buttons.push(1);
+    if (startPage > 2) buttons.push('...');
+    for (let i = startPage; i <= endPage; i++) {
+      buttons.push(i);
+    }
+
+    if (endPage < totalPages - 1) buttons.push('...');
+    if (totalPages > 1) buttons.push(totalPages);
+    if (currentPage < totalPages) buttons.push('>');
+
+    return buttons;
+  };
+
   return (
     <div className="main-wrapper">
       <aside className="aside-wrapper">
@@ -168,7 +203,7 @@ function ProductList() {
             }
           />
           <div className="products-sort-wrapper">
-          <span className="products-sort-title">排序</span>
+            <span className="products-sort-title">排序</span>
             <select
               value={filters.sort}
               onChange={(e) =>
@@ -182,7 +217,9 @@ function ProductList() {
           </div>
         </div>
         <div className="products-bottom-wrapper">
-          <div className="products-title">共找到 {filteredProducts.length} 件商品</div>
+          <div className="products-title">
+            共找到 {filteredProducts.length} 件商品
+          </div>
           <table className="products-table">
             <thead>
               <tr>
@@ -209,6 +246,58 @@ function ProductList() {
               )}
             </tbody>
           </table>
+        </div>
+        <div className="products-pagination-wrapper">
+          {generateButtons(filters.currentPage, totalPages).map(
+            (button, index) => {
+              if (button === '<') {
+                return (
+                  <button
+                    key={index}
+                    onClick={() =>
+                      dispatch({
+                        type: 'SET_PAGE',
+                        payload: filters.currentPage - 1,
+                      })
+                    }
+                    disabled={filters.currentPage === 1}
+                  >
+                    &lt;
+                  </button>
+                );
+              }
+              else if (button === '>') {
+                return (
+                  <button
+                    key={index}
+                    onClick={() =>
+                      dispatch({
+                        type: 'SET_PAGE',
+                        payload: filters.currentPage + 1,
+                      })
+                    }
+                    disabled={filters.currentPage === totalPages}
+                  >
+                    &gt;
+                  </button>
+                );
+              }
+              else if (button === '...') {
+                return <span key={index}>...</span>;
+              }
+              return (
+                <button
+                  key={index}
+                  onClick={() =>
+                    dispatch({ type: 'SET_PAGE', payload: button })
+                  }
+                  disabled={button === filters.currentPage}
+                >
+                  {button}
+                </button>
+              );
+            }
+          )}
         </div>
       </div>
     </div>
