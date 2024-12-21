@@ -72,6 +72,7 @@ function ProductList() {
   });
   const productsPerPage = 14;
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
   useEffect(() => {
     const filtered = products.filter((product) => {
       const matchesCategory =
@@ -200,7 +201,7 @@ function ProductList() {
                 }));
               }}
             />
-            <button
+            <button className='price-button'
               onClick={() => {
                 dispatch({
                   type: 'SET_PRICE_RANGE',
