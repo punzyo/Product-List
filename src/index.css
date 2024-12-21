@@ -10,6 +10,6 @@ input[type='number']::-webkit-inner-spin-button {
 button {
   background-color: inherit;
 }
-button:hover{
+button:hover, select:hover{
   cursor: pointer;
 }

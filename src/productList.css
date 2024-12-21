@@ -126,7 +126,6 @@ aside input[type='checkbox'] {
   background-color: #f1f1f1;
 }
 .products-pagination-wrapper {
-  height: 35px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
@@ -162,7 +161,7 @@ aside input[type='checkbox'] {
   font-weight: bold;
 }
 .products-select-wrapper > select {
-  height: 100%;
+  height: 35px;
   margin-left: 10px;
   padding: 0px 5px;
 }
@@ -220,7 +219,6 @@ aside input[type='checkbox'] {
     content: attr(data-label);
     font-weight: bold;
     display: inline;
-    margin-bottom: 5px;
     color: #555;
   }
   .products-pagination-wrapper {
@@ -279,5 +277,8 @@ aside input[type='checkbox'] {
     align-items: flex-start;
     flex-wrap: nowrap;
     font-size: 14px;
+  }
+  .products-select-wrapper > select {
+    height: 25px;
   }
 }
