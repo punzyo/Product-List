@@ -5,7 +5,7 @@ import products from '../items.json';
 const categories = ['A', 'B', 'C', 'D', 'E'];
 const initialState = {
   selectedCategories: [],
-  priceRange: { min: -Infinity, max: Infinity },
+  priceRange: { min: null, max: null },
   search: '',
   inStockOnly: false,
   sort: 'none',
@@ -23,20 +23,16 @@ const filterReducer = (state, action) => {
         currentPage: 1,
       };
     }
-    case 'SET_PRICE_RANGE':
+    case 'SET_PRICE_RANGE': {
       return {
         ...state,
         priceRange: {
           ...state.priceRange,
-          [action.payload.type]:
-            action.payload.value === ''
-              ? action.payload.type === 'min'
-                ? -Infinity
-                : Infinity
-              : action.payload.value,
+          [action.payload.type]: action.payload.value,
         },
         currentPage: 1,
       };
+    }
     case 'SET_SEARCH':
       return {
         ...state,
@@ -78,10 +74,13 @@ function ProductList() {
       const matchesCategory =
         filters.selectedCategories.length === 0 ||
         filters.selectedCategories.includes(product.category);
+
       const matchesPrice =
-        product.price >= filters.priceRange.min &&
-        product.price <= filters.priceRange.max;
+        product.price >= (filters.priceRange.min ?? 0) &&
+        product.price <= (filters.priceRange.max ?? Infinity);
+
       const matchesStock = filters.inStockOnly ? product.inStock : true;
+
       const matchesSearch = product.name
         .toLowerCase()
         .includes(filters.search.toLowerCase());
@@ -172,33 +171,35 @@ function ProductList() {
             <input
               className="price-input"
               type="number"
-              min="0"
-              value={filters.priceRange.min}
-              onChange={(e) =>
+              value={filters.priceRange.min ?? ''}
+              onInput={(e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+              }}
+              onChange={(e) => {
+                const value =
+                  e.target.value === '' ? null : Number(e.target.value);
                 dispatch({
                   type: 'SET_PRICE_RANGE',
-                  payload: {
-                    type: 'min',
-                    value: e.target.value === '' ? '' : Number(e.target.value),
-                  },
-                })
-              }
+                  payload: { type: 'min', value },
+                });
+              }}
             />
             <span> - </span>
             <input
               className="price-input"
               type="number"
-              min="0"
-              value={filters.priceRange.max}
-              onChange={(e) =>
+              value={filters.priceRange.max ?? ''}
+              onInput={(e) => {
+                e.target.value = e.target.value.replace(/[^0-9]/g, '');
+              }}
+              onChange={(e) => {
+                const value =
+                  e.target.value === '' ? null : Number(e.target.value);
                 dispatch({
                   type: 'SET_PRICE_RANGE',
-                  payload: {
-                    type: 'max',
-                    value: e.target.value === '' ? '' : Number(e.target.value),
-                  },
-                })
-              }
+                  payload: { type: 'max', value },
+                });
+              }}
             />
           </div>
         </div>
