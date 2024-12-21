@@ -105,7 +105,7 @@ function ProductList() {
 
     const startPage = Math.max(2, currentPage - 2);
     const endPage = Math.min(totalPages - 1, currentPage + 2);
-  
+
     buttons.push(1);
     if (startPage > 2) buttons.push('...');
     for (let i = startPage; i <= endPage; i++) {
@@ -231,14 +231,21 @@ function ProductList() {
             </thead>
             <tbody>
               {filteredProducts.length > 0 ? (
-                filteredProducts.slice(0, 20).map((product, index) => (
-                  <tr key={index}>
-                    <td data-label="商品名稱: ">{product.name}</td>
-                    <td data-label="類別: ">{product.category}</td>
-                    <td data-label="價格: ">${product.price}</td>
-                    <td data-label="庫存: ">{product.inStock ? '是' : '否'}</td>
-                  </tr>
-                ))
+                filteredProducts
+                  .slice(
+                    (filters.currentPage - 1) * productsPerPage,
+                    filters.currentPage * productsPerPage
+                  )
+                  .map((product, index) => (
+                    <tr key={index}>
+                      <td data-label="商品名稱: ">{product.name}</td>
+                      <td data-label="類別: ">{product.category}</td>
+                      <td data-label="價格: ">${product.price}</td>
+                      <td data-label="庫存: ">
+                        {product.inStock ? '是' : '否'}
+                      </td>
+                    </tr>
+                  ))
               ) : (
                 <tr>
                   <td colSpan="4">無搜尋到商品</td>
@@ -265,8 +272,7 @@ function ProductList() {
                     &lt;
                   </button>
                 );
-              }
-              else if (button === '>') {
+              } else if (button === '>') {
                 return (
                   <button
                     key={index}
@@ -281,8 +287,7 @@ function ProductList() {
                     &gt;
                   </button>
                 );
-              }
-              else if (button === '...') {
+              } else if (button === '...') {
                 return <span key={index}>...</span>;
               }
               return (
