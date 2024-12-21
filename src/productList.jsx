@@ -119,6 +119,18 @@ function ProductList() {
     return buttons;
   };
 
+  const generatePageOptions = (totalPages) => {
+    const options = [];
+    for (let i = 1; i <= totalPages; i++) {
+      options.push(
+        <option key={i} value={i}>
+          第 {i} 頁
+        </option>
+      );
+    }
+    return options;
+  };
+
   return (
     <div className="main-wrapper">
       <aside className="aside-wrapper">
@@ -255,54 +267,69 @@ function ProductList() {
           </table>
         </div>
         <div className="products-pagination-wrapper">
-          {generateButtons(filters.currentPage, totalPages).map(
-            (button, index) => {
-              if (button === '<') {
+          <div className="products-button-wrapper">
+            {generateButtons(filters.currentPage, totalPages).map(
+              (button, index) => {
+                if (button === '<') {
+                  return (
+                    <button
+                      key={index}
+                      onClick={() =>
+                        dispatch({
+                          type: 'SET_PAGE',
+                          payload: filters.currentPage - 1,
+                        })
+                      }
+                      disabled={filters.currentPage === 1}
+                    >
+                      &lt;
+                    </button>
+                  );
+                } else if (button === '>') {
+                  return (
+                    <button
+                      key={index}
+                      onClick={() =>
+                        dispatch({
+                          type: 'SET_PAGE',
+                          payload: filters.currentPage + 1,
+                        })
+                      }
+                      disabled={filters.currentPage === totalPages}
+                    >
+                      &gt;
+                    </button>
+                  );
+                } else if (button === '...') {
+                  return <span key={index}>...</span>;
+                }
                 return (
                   <button
                     key={index}
                     onClick={() =>
-                      dispatch({
-                        type: 'SET_PAGE',
-                        payload: filters.currentPage - 1,
-                      })
+                      dispatch({ type: 'SET_PAGE', payload: button })
                     }
-                    disabled={filters.currentPage === 1}
+                    className={
+                      button === filters.currentPage ? 'active-button' : ''
+                    }
                   >
-                    &lt;
+                    {button}
                   </button>
                 );
-              } else if (button === '>') {
-                return (
-                  <button
-                    key={index}
-                    onClick={() =>
-                      dispatch({
-                        type: 'SET_PAGE',
-                        payload: filters.currentPage + 1,
-                      })
-                    }
-                    disabled={filters.currentPage === totalPages}
-                  >
-                    &gt;
-                  </button>
-                );
-              } else if (button === '...') {
-                return <span key={index}>...</span>;
               }
-              return (
-                <button
-                  key={index}
-                  onClick={() =>
-                    dispatch({ type: 'SET_PAGE', payload: button })
-                  }
-                  className={button === filters.currentPage ? 'active-button' : ''}
-                >
-                  {button}
-                </button>
-              );
-            }
-          )}
+            )}
+          </div>
+          <div className="products-select-wrapper">
+            <span className="products-select-title">前往頁面</span>
+            <select
+              value={filters.currentPage}
+              onChange={(e) =>
+                dispatch({ type: 'SET_PAGE', payload: Number(e.target.value) })
+              }
+            >
+              {generatePageOptions(totalPages)}
+            </select>
+          </div>
         </div>
       </div>
     </div>

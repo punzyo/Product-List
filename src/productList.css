@@ -110,10 +110,12 @@ aside input[type='checkbox'] {
   background-color: #f1f1f1;
 }
 .products-pagination-wrapper {
+  height: 35px;
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-top: 20px;
   user-select: none;
 }
@@ -125,9 +127,28 @@ aside input[type='checkbox'] {
 .products-pagination-wrapper button:hover {
   background-color: #ddd;
 }
+.products-button-wrapper {
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
 .active-button {
   background-color: #bbb;
   border: none;
+}
+.products-select-wrapper {
+  min-width: 165px;
+  height: 100%;
+}
+.products-select-title{
+  font-weight: bold;
+}
+.products-select-wrapper > select {
+  height: 100%;
+  margin-left: 10px;
+  padding: 0px 5px;
 }
 
 @media (max-width: 700px) {
@@ -186,12 +207,13 @@ aside input[type='checkbox'] {
     margin-bottom: 5px;
     color: #555;
   }
-  .products-pagination-wrapper{
+  .products-pagination-wrapper {
     justify-content: center;
   }
   .products-pagination-wrapper button {
     width: 30px;
-    height: 30px;
+    height: 25px;
+    font-size: 12px;
   }
 }
 
@@ -230,4 +252,10 @@ aside input[type='checkbox'] {
   .products-table td {
     padding: 6px;
   }
+  .products-pagination-wrapper {
+    height: 60px;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    font-size: 14px;
+}
 }
