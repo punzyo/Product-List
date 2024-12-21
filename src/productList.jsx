@@ -167,8 +167,8 @@ function ProductList() {
               dispatch({ type: 'SET_SEARCH', payload: e.target.value })
             }
           />
-          <span className="products-sort-title">排序</span>
           <div className="products-sort-wrapper">
+          <span className="products-sort-title">排序</span>
             <select
               value={filters.sort}
               onChange={(e) =>
@@ -182,7 +182,7 @@ function ProductList() {
           </div>
         </div>
         <div className="products-bottom-wrapper">
-          <div className="products-title">{filteredProducts.length} 件商品</div>
+          <div className="products-title">共找到 {filteredProducts.length} 件商品</div>
           <table className="products-table">
             <thead>
               <tr>
